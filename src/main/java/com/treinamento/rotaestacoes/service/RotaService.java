@@ -1,11 +1,16 @@
 package com.treinamento.rotaestacoes.service;
 
+import com.treinamento.rotaestacoes.exception.OrigemDestinoNotValid;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class RotaService {
+
+    public String getStations() {
+        return "Sé Paulista Brigadeiro SãoLuis FariaLima Ipiranga Pinheiro BarraFunda AguaRasa";
+    }
 
     public List<String> getRoute() {
         List<String> listRoute = new ArrayList<String>();
@@ -18,13 +23,20 @@ public class RotaService {
     }
 
     public List<String> getFinalRoute(List<String> origemDestino) {
-        return getRoutesContainsOrigemDestino(getRoute(), origemDestino.get(0), origemDestino.get(1));
+        var origem = origemDestino.get(0);
+        var destino = origemDestino.get(1);
+        if (origemDestino.size() != 2 ||
+                !getStations().contains(origem) ||
+                !getStations().contains(destino) ||
+                origem.equals(destino)) {
+            throw new OrigemDestinoNotValid("Tamanho de Entrada Inválida ou Origem/Destino inválido!");
+        }
+        return getRoutesContainsOrigemDestino(getRoute(), origem, destino);
     }
 
     List<String> minimumRoute = new ArrayList<>();
     private int smaller = Integer.MAX_VALUE;
     private final int smallerNegative = Integer.MAX_VALUE;
-
 
     public List<String> getRoutesContainsOrigemDestino(List<String> routes, String origem, String destino) {
         HashMap<String, List<String>> map = new HashMap<String,List<String>>();
@@ -68,4 +80,6 @@ public class RotaService {
         smaller = Integer.MAX_VALUE;
         return minimumRouteReturn;
     }
+
+
 }
