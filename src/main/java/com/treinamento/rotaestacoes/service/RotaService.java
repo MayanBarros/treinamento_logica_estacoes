@@ -21,35 +21,51 @@ public class RotaService {
         return getRoutesContainsOrigemDestino(getRoute(), origemDestino.get(0), origemDestino.get(1));
     }
 
-    private int menor = Integer.MAX_VALUE;
+    List<String> minimumRoute = new ArrayList<>();
+    private int smaller = Integer.MAX_VALUE;
+    private final int smallerNegative = Integer.MAX_VALUE;
+
 
     public List<String> getRoutesContainsOrigemDestino(List<String> routes, String origem, String destino) {
         HashMap<String, List<String>> map = new HashMap<String,List<String>>();
         HashMap<Integer, String> rotas = new HashMap<Integer, String>();
 
         for (String route: routes) {
-            String[] ro = route.split(";");
-            map.put(route, Arrays.asList(ro));
+            String[] routeSplit = route.split(";");
+            map.put(route, Arrays.asList(routeSplit));
         }
 
         for (Map.Entry<String, List<String>> str : map.entrySet()) {
             if (str.getValue().contains(origem + ";" + destino)) rotas.put(1, str.getKey());
-
             if (str.getValue().contains(origem) && str.getValue().contains(destino)) {
                 rotas.put(str.getValue().indexOf(destino) - str.getValue().indexOf(origem), str.getKey());
             }
         }
 
         rotas.keySet().forEach(val -> {
-            if (val < menor && val > 0) menor = val;
+            if (val > 0) {
+                if (val < smaller) {
+                    smaller = val;
+                    minimumRoute = List.of(rotas.get(smaller).split(";"));
+                }
+            } else {
+                if ((val * -1) < smallerNegative && (val * -1) > 0) {
+                    minimumRoute = List.of(rotas.get(val).split(";"));
+                }
+            }
         });
 
-        var minimumRoute =  List.of(rotas.get(menor).split(";"));
         var minimumRouteReturn =  new ArrayList<String>();
+
+        if (minimumRoute.indexOf(destino) < minimumRoute.indexOf(origem)) {
+            for (int i = minimumRoute.indexOf(origem); i >= minimumRoute.indexOf(destino); i--) {
+                minimumRouteReturn.add(minimumRoute.get(i));
+            }
+        }
         for (int i = minimumRoute.indexOf(origem); i <= minimumRoute.indexOf(destino); i++) {
             minimumRouteReturn.add(minimumRoute.get(i));
         }
-        menor = Integer.MAX_VALUE;
+        smaller = Integer.MAX_VALUE;
         return minimumRouteReturn;
     }
 }
