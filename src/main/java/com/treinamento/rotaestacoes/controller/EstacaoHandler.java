@@ -16,8 +16,10 @@ public class EstacaoHandler {
     private RotaService service;
 
     public Mono<ServerResponse> calculaRotaMaisCurta(ServerRequest request) {
-        var origemDestino = List.of("Luz", "Pinheiros");
-        var rota = service.rotaFinal(origemDestino);
-        return ServerResponse.ok().bodyValue(rota);
+        return request.bodyToMono(List.class)
+                .flatMap(list -> {
+            var result = this.service.getFinalRoute(list);
+            return ServerResponse.ok().bodyValue(result);
+        });
     }
 }
