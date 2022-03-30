@@ -1,6 +1,6 @@
 package com.treinamento.rotaestacoes.router;
 
-import com.treinamento.rotaestacoes.controller.EstacaoHandler;
+import com.treinamento.rotaestacoes.controller.StationHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -12,11 +12,11 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 
 @Configuration
-public class EstacaoRouter {
+public class StationRouter {
     @Bean
-    public RouterFunction<ServerResponse> route(EstacaoHandler handler) {
+    public RouterFunction<ServerResponse> route(StationHandler handler) {
         return RouterFunctions
-                .route(GET("/estacao")
-                        .and(accept(MediaType.APPLICATION_JSON)), handler::calculaRotaMaisCurta);
+                .route(GET("/station")
+                        .and(accept(MediaType.APPLICATION_JSON)), handler::getMinimumRoute);
     }
 }

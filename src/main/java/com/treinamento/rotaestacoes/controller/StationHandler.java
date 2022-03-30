@@ -1,7 +1,7 @@
 package com.treinamento.rotaestacoes.controller;
 
-import com.treinamento.rotaestacoes.exception.OrigemDestinoNotValid;
-import com.treinamento.rotaestacoes.service.RotaService;
+import com.treinamento.rotaestacoes.exception.OriginDestinationNotValid;
+import com.treinamento.rotaestacoes.service.RouteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -13,18 +13,18 @@ import java.util.List;
 import java.util.function.Function;
 
 @Component
-public class EstacaoHandler {
+public class StationHandler {
 
     @Autowired
-    private RotaService service;
+    private RouteService service;
 
-    public Mono<ServerResponse> calculaRotaMaisCurta(ServerRequest request) {
+    public Mono<ServerResponse> getMinimumRoute(ServerRequest request) {
         return request.bodyToMono(List.class)
                 .flatMap(list -> {
             var result = this.service.getFinalRoute(list);
             return ServerResponse.ok().bodyValue(result);
         })
-                .onErrorResume(OrigemDestinoNotValid.class, e -> {
+                .onErrorResume(OriginDestinationNotValid.class, e -> {
                     return ServerResponse.badRequest().bodyValue(e.getMessage());
                 })
                 .onErrorResume(treatGenericError());
@@ -37,6 +37,4 @@ public class EstacaoHandler {
                     .bodyValue(error.getMessage());
         };
     }
-
-
 }

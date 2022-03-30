@@ -1,12 +1,12 @@
 package com.treinamento.rotaestacoes.service;
 
-import com.treinamento.rotaestacoes.exception.OrigemDestinoNotValid;
+import com.treinamento.rotaestacoes.exception.OriginDestinationNotValid;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
-public class RotaService {
+public class RouteService {
 
     private boolean validOriginDestinationRequest(List<String> originDestination, String origin, String destination) {
         return originDestination.size() != 2 ||
@@ -33,7 +33,7 @@ public class RotaService {
         var origin = originDestination.get(0);
         var destination = originDestination.get(1);
         if (validOriginDestinationRequest(originDestination, origin, destination)) {
-            throw new OrigemDestinoNotValid("Tamanho de Entrada Inválida ou Origem/Destino inválido!");
+            throw new OriginDestinationNotValid("Tamanho de Entrada Inválida ou Origem/Destino inválido!");
         }
         return getRoutesThatContainsOriginDestination(getRoute(), origin, destination);
     }
