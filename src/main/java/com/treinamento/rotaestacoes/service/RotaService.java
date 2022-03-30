@@ -8,12 +8,19 @@ import java.util.*;
 @Service
 public class RotaService {
 
+    private boolean validOriginDestinationRequest(List<String> originDestination, String origin, String destination) {
+        return originDestination.size() != 2 ||
+                !getStations().contains(origin) ||
+                !getStations().contains(destination) ||
+                origin.equals(destination);
+    }
+
     public String getStations() {
-        return "Sé Paulista Brigadeiro SãoLuis FariaLima Ipiranga Pinheiro BarraFunda AguaRasa";
+        return "Sé Paulista Brigadeiro SãoLuis FariaLima Ipiranga Pinheiros BarraFunda AguaRasa";
     }
 
     public List<String> getRoute() {
-        List<String> listRoute = new ArrayList<String>();
+        List<String> listRoute = new ArrayList<>();
         listRoute.add("Sé;Paulista;Brigadeiro;SãoLuis;BarraFunda;Pinheiros;FariaLima"); //1
         listRoute.add("Sé;AguaRasa;Ipiranga;BarraFunda;Pinheiros;FariaLima"); //2
         listRoute.add("Sé;AguaRasa;Ipiranga;BarraFunda;SãoLuis;Brigadeiro;Paulista"); //3
@@ -22,64 +29,66 @@ public class RotaService {
         return listRoute;
     }
 
-    public List<String> getFinalRoute(List<String> origemDestino) {
-        var origem = origemDestino.get(0);
-        var destino = origemDestino.get(1);
-        if (origemDestino.size() != 2 ||
-                !getStations().contains(origem) ||
-                !getStations().contains(destino) ||
-                origem.equals(destino)) {
+    public List<String> getFinalRoute(List<String> originDestination) {
+        var origin = originDestination.get(0);
+        var destination = originDestination.get(1);
+        if (validOriginDestinationRequest(originDestination, origin, destination)) {
             throw new OrigemDestinoNotValid("Tamanho de Entrada Inválida ou Origem/Destino inválido!");
         }
-        return getRoutesContainsOrigemDestino(getRoute(), origem, destino);
+        return getRoutesThatContainsOriginDestination(getRoute(), origin, destination);
     }
 
     List<String> minimumRoute = new ArrayList<>();
     private int smaller = Integer.MAX_VALUE;
-    private final int smallerNegative = Integer.MAX_VALUE;
 
-    public List<String> getRoutesContainsOrigemDestino(List<String> routes, String origem, String destino) {
-        HashMap<String, List<String>> map = new HashMap<String,List<String>>();
-        HashMap<Integer, String> rotas = new HashMap<Integer, String>();
+    public List<String> getRoutesThatContainsOriginDestination(List<String> routes, String origin, String destination) {
+        HashMap<String, List<String>> map = new HashMap<>();
+        HashMap<Integer, String> routesMap = new HashMap<>();
+        List<String> minimumRouteReturn = new ArrayList<>();
 
-        for (String route: routes) {
+        for (String route : routes) {
             String[] routeSplit = route.split(";");
-            map.put(route, Arrays.asList(routeSplit));
+            var indexOrigin = List.of(routeSplit).indexOf(origin);
+            var indexDestination = List.of(routeSplit).indexOf(destination);
+
+            if (indexOrigin > indexDestination && indexDestination != -1) {
+
+                for (int i = 0; i < routeSplit.length / 2; i++) {
+                    String temp = routeSplit[i];
+                    routeSplit[i] = routeSplit[routeSplit.length - 1 - i];
+                    routeSplit[routeSplit.length - 1 - i] = temp;
+                }
+                map.put(String.join(";", routeSplit), Arrays.asList(routeSplit));
+            } else {
+                map.put(route, Arrays.asList(routeSplit));
+            }
         }
 
         for (Map.Entry<String, List<String>> str : map.entrySet()) {
-            if (str.getValue().contains(origem + ";" + destino)) rotas.put(1, str.getKey());
-            if (str.getValue().contains(origem) && str.getValue().contains(destino)) {
-                rotas.put(str.getValue().indexOf(destino) - str.getValue().indexOf(origem), str.getKey());
+
+            if (str.getValue().contains(origin + ";" + destination)) {
+                routesMap.put(1, str.getKey());
+            }
+
+            if (str.getValue().contains(origin) && str.getValue().contains(destination)) {
+                routesMap.put(str.getValue().indexOf(destination) - str.getValue().indexOf(origin), str.getKey());
             }
         }
 
-        rotas.keySet().forEach(val -> {
-            if (val > 0) {
-                if (val < smaller) {
-                    smaller = val;
-                    minimumRoute = List.of(rotas.get(smaller).split(";"));
-                }
-            } else {
-                if ((val * -1) < smallerNegative && (val * -1) > 0) {
-                    minimumRoute = List.of(rotas.get(val).split(";"));
-                }
-            }
-        });
+        routesMap
+                .keySet()
+                .forEach(val -> {
+                    if (val < smaller && val > 0) {
+                        smaller = val;
+                    }
+                });
 
-        var minimumRouteReturn =  new ArrayList<String>();
+        minimumRoute = List.of(routesMap.get(smaller).split(";"));
 
-        if (minimumRoute.indexOf(destino) < minimumRoute.indexOf(origem)) {
-            for (int i = minimumRoute.indexOf(origem); i >= minimumRoute.indexOf(destino); i--) {
-                minimumRouteReturn.add(minimumRoute.get(i));
-            }
-        }
-        for (int i = minimumRoute.indexOf(origem); i <= minimumRoute.indexOf(destino); i++) {
+        for (int i = minimumRoute.indexOf(origin); i <= minimumRoute.indexOf(destination); i++) {
             minimumRouteReturn.add(minimumRoute.get(i));
         }
         smaller = Integer.MAX_VALUE;
         return minimumRouteReturn;
     }
-
-
 }
